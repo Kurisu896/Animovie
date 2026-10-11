@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.SubjectCommentLikeMapper">
+  <!-- 插入点赞记录 -->
+  <insert id="insert">
+    INSERT INTO subject_comment_likes(comment_id,user_id,created_at)
+    VALUES(#{commentId},#{userId},NOW())
+  </insert>
+  <!-- 删除点赞记录 -->
+  <delete id="delete">
+    DELETE FROM subject_comment_likes WHERE comment_id=#{commentId} AND user_id=#{userId}
+  </delete>
+  <!-- 检查点赞记录是否存在 -->
+  <select id="exists" resultType="java.lang.Long">
+    SELECT COUNT(*) FROM subject_comment_likes WHERE comment_id=#{commentId} AND user_id=#{userId}
+  </select>
+  <!-- 查询用户在某作品下的所有点赞(预加载点赞) -->
+  <select id="listByUserSubject" resultType="java.lang.Long">
+    SELECT scl.comment_id
+    FROM subject_comment_likes scl JOIN subject_comments sc ON scl.comment_id=sc.id
+    WHERE scl.user_id=#{userId} AND sc.subject_id=#{subjectId}
+  </select>
+</mapper>
+

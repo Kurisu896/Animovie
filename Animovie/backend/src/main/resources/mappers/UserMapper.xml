@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.UserMapper">
+  <select id="listByKeyword" resultType="com.bgm.domain.User">
+    <!-- SELECT子句：指定查询的字段列表 -->
+    <!-- 字段说明：
+         - id：用户ID，主键
+         - username：用户名
+         - nickname：用户昵称
+         - avatar_path AS avatarPath：数据库字段avatar_path映射为实体类的avatarPath属性（驼峰命名转换）
+         - signature：用户个性签名
+       -->
+    SELECT id, username, nickname, avatar_path AS avatarPath, signature
+    
+    <!-- FROM子句：指定查询的表名 -->
+    <!-- 表名：users，对应User实体类映射的数据库表 -->
+    FROM users
+
+    <!-- WHERE子句：指定查询条件 -->
+    <!-- 条件逻辑：使用OR连接两个模糊查询条件
+         - username LIKE CONCAT('%',#{keyword},'%')：用户名包含关键词
+         - nickname LIKE CONCAT('%',#{keyword},'%')：昵称包含关键词
+         - CONCAT函数：拼接%和关键词，实现模糊匹配
+         - #{keyword}：MyBatis参数占位符，安全地获取传入的keyword参数
+       -->
+    WHERE username LIKE CONCAT('%', #{keyword}, '%') 
+       OR nickname LIKE CONCAT('%', #{keyword}, '%')
+    
+    <!-- ORDER BY子句：指定结果排序方式 -->
+    <!-- 排序规则：ORDER BY id DESC，按照用户ID降序排列（最新的用户排在前面） -->
+    ORDER BY id DESC
+  </select>
+</mapper>

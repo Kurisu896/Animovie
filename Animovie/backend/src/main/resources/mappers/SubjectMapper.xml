@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.SubjectMapper">
+  <!-- 列表查询 -->
+  <select id="listAdvanced" resultType="com.bgm.domain.Subject">
+    SELECT
+    <!-- 评分筛选 -->
+      <if test="p.ratingMin != null or p.ratingMax != null">
+        s.id,s.cn_name AS cnName,s.jp_name AS jpName,s.alias,s.first_air_date AS firstAirDate,
+        s.episodes,s.studio,s.country,s.official_site AS officialSite,s.category,s.tags,
+        s.cover_path AS coverPath,s.updated_date AS updatedDate,
+        AVG(c.rating) AS avgRating, COUNT(c.id) AS ratingCount
+      </if>
+      <if test="p.ratingMin == null and p.ratingMax == null">
+        s.id,s.cn_name AS cnName,s.jp_name AS jpName,s.alias,s.first_air_date AS firstAirDate,
+        s.episodes,s.studio,s.country,s.official_site AS officialSite,s.category,s.tags,
+        s.cover_path AS coverPath,s.updated_date AS updatedDate
+      </if>
+    FROM subjects s
+    <if test="p.ratingMin != null or p.ratingMax != null">
+      LEFT JOIN collections c ON c.subject_id = s.id AND c.rating > 0
+    </if>
+    <!-- 关键词筛选 -->
+    <where>
+      <if test="p.keyword != null and p.keyword != ''">
+        AND (s.cn_name LIKE CONCAT('%', #{p.keyword}, '%')
+             OR s.jp_name LIKE CONCAT('%', #{p.keyword}, '%')
+             OR s.alias   LIKE CONCAT('%', #{p.keyword}, '%'))
+      </if>
+      <!-- 分类筛选 -->
+      <if test="p.category != null and p.category != ''">
+        AND s.category = #{p.category}
+      </if>
+      <!-- 国家筛选 -->
+      <if test="p.country != null and p.country != ''">
+        AND s.country = #{p.country}
+      </if>
+      <!-- 年份筛选 -->
+      <if test="p.year != null">
+        AND YEAR(s.first_air_date) = #{p.year}
+      </if>
+      <!-- 月份筛选 -->
+      <if test="p.month != null">
+        AND MONTH(s.first_air_date) = #{p.month}
+      </if>
+      <!-- 标签筛选 -->
+      <if test="p.tagKeyword != null and p.tagKeyword != ''">
+        AND s.tags LIKE CONCAT('%', #{p.tagKeyword}, '%')
+      </if>
+    </where>
+    <if test="p.ratingMin != null or p.ratingMax != null">
+      GROUP BY s.id
+      <if test="p.ratingMin != null or p.ratingMax != null">
+        HAVING 1=1
+        <if test="p.ratingMin != null">
+          AND AVG(c.rating) &gt;= #{p.ratingMin}
+        </if>
+        <if test="p.ratingMax != null">
+          AND AVG(c.rating) &lt;= #{p.ratingMax}
+        </if>
+      </if>
+    </if>
+    ORDER BY s.id DESC
+  </select>
+  <!-- 按收藏数排序 -->
+  <select id="listByCollectCount" resultType="com.bgm.domain.Subject">
+    SELECT s.id,s.cn_name AS cnName,s.jp_name AS jpName,s.alias,s.first_air_date AS firstAirDate,
+           s.episodes,s.studio,s.country,s.official_site AS officialSite,s.category,s.tags,
+           s.cover_path AS coverPath,s.updated_date AS updatedDate,
+           COUNT(c.id) AS collectCount,
+           AVG(NULLIF(c.rating,0)) AS avgRating,
+           COUNT(NULLIF(c.rating,0)) AS ratingCount
+    FROM subjects s LEFT JOIN collections c ON c.subject_id=s.id
+    GROUP BY s.id
+    ORDER BY collectCount DESC
+  </select>
+  <!-- 按平均评分排序 -->
+  <select id="listByAvgRating" resultType="com.bgm.domain.Subject">
+    SELECT s.id,s.cn_name AS cnName,s.jp_name AS jpName,s.alias,s.first_air_date AS firstAirDate,
+           s.episodes,s.studio,s.country,s.official_site AS officialSite,s.category,s.tags,
+           s.cover_path AS coverPath,s.updated_date AS updatedDate,
+           (SELECT COUNT(*) FROM collections cc WHERE cc.subject_id=s.id) AS collectCount,
+           AVG(c.rating) AS avgRating, COUNT(c.id) AS ratingCount
+    FROM subjects s LEFT JOIN collections c ON c.subject_id=s.id AND c.rating>0
+    GROUP BY s.id
+    HAVING COUNT(c.id) &gt;= #{minCount}
+    ORDER BY avgRating DESC
+  </select>
+  <!-- 按ID获取平均评分 -->
+  <select id="avgRatingBySubject" resultType="java.lang.Double">
+    SELECT AVG(rating) FROM collections WHERE subject_id=#{subjectId} AND rating>0
+  </select>
+  <!-- 按ID获取评分统计 -->
+  <select id="ratingCountsBySubject" resultType="java.util.Map">
+    SELECT rating AS r, COUNT(*) AS c FROM collections WHERE subject_id=#{subjectId} AND rating>0 GROUP BY rating ORDER BY rating ASC
+  </select>
+</mapper>

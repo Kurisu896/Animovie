@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.TopicMapper">
+    <!-- 根据影视作品ID查询话题 -->
+  <select id="listBySubject" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.subject_id=#{subjectId} AND t.status='OPEN'
+    ORDER BY t.updated_at DESC
+  </select>
+    <!-- 查询全站所有公开话题 -->
+  <select id="listAll" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.status='OPEN'
+    ORDER BY t.updated_at DESC
+  </select>
+    <!-- 关键词搜索话题 -->
+  <select id="listByKeyword" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id JOIN subjects s ON t.subject_id=s.id
+    WHERE (t.title LIKE CONCAT('%',#{keyword},'%')
+        OR t.content LIKE CONCAT('%',#{keyword},'%')
+        OR s.cn_name LIKE CONCAT('%',#{keyword},'%')
+        OR s.jp_name LIKE CONCAT('%',#{keyword},'%')
+        OR s.alias LIKE CONCAT('%',#{keyword},'%'))
+    AND t.status='OPEN'
+    ORDER BY t.updated_at DESC
+  </select>
+    <!-- 话题回复数+1 -->
+  <update id="incReply">
+    UPDATE topics SET reply_count=reply_count+1, updated_at=NOW() WHERE id=#{id}
+  </update>
+    <!-- 重新计算话题回复数 -->
+  <update id="refreshReplyCount">
+    UPDATE topics t
+    SET t.reply_count = (
+      SELECT COUNT(*) FROM comments c WHERE c.topic_id = t.id
+    ), t.updated_at=NOW()
+    WHERE t.id=#{id}
+  </update>
+    <!-- 查询待审核话题 -->
+  <select id="listPending" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.status='LOCKED'
+    ORDER BY t.created_at DESC
+  </select>
+    <!-- 查询被拒绝话题 -->
+  <select id="listRejected" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.status='REJECTED'
+    ORDER BY t.created_at DESC
+  </select>
+    <!-- 查询用户发布的所有话题 -->
+  <select id="listByUser" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.user_id=#{userId}
+    ORDER BY t.updated_at DESC
+  </select>
+    <!-- 审核通过话题 -->
+  <update id="approve">UPDATE topics SET status='OPEN', updated_at=NOW() WHERE id=#{id}</update>
+    <!-- 锁定/待审核话题 -->
+  <update id="lock">UPDATE topics SET status='LOCKED', updated_at=NOW() WHERE id=#{id}</update>
+    <!-- 打回话题 -->
+  <update id="reject">UPDATE topics SET status='REJECTED', updated_at=NOW() WHERE id=#{id}</update>
+    <!-- 更新话题内容 -->
+  <update id="updateEdited">
+    UPDATE topics SET title=#{title}, content=#{content}, status='LOCKED', updated_at=NOW() WHERE id=#{id}
+  </update>
+    <!-- 根据ID查询话题详情 -->
+  <select id="getById" resultType="com.bgm.domain.Topic">
+    SELECT t.id,t.subject_id AS subjectId,t.user_id AS userId,t.title,t.content,t.status,
+           t.reply_count AS replyCount,t.created_at AS createdAt,t.updated_at AS updatedAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM topics t JOIN users u ON t.user_id=u.id
+    WHERE t.id=#{id}
+  </select>
+</mapper>

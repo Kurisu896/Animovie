@@ -1,0 +1,27 @@
+# IDE and editor settings
+.idea/
+.vscode/
+*.iml
+
+# Java / Spring Boot build output
+**/target/
+*.log
+
+# Node / Vite build output
+**/node_modules/
+**/dist/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+application-local.yaml
+
+# User uploads
+**/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db

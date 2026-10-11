@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.CommentMapper">
+    <!-- 按楼层升序查询话题评论 -->
+  <select id="listByTopic" resultType="com.bgm.domain.Comment">
+    SELECT c.id,c.topic_id AS topicId,c.user_id AS userId,c.parent_id AS parentId,c.content,
+           c.like_count AS likeCount,c.floor,c.created_at AS createdAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM comments c JOIN users u ON c.user_id=u.id
+    WHERE c.topic_id=#{topicId}
+    ORDER BY c.floor ASC
+  </select>
+    <!-- 按创建时间降序 -->
+  <select id="listByTopicOrderByCreatedDesc" resultType="com.bgm.domain.Comment">
+    SELECT c.id,c.topic_id AS topicId,c.user_id AS userId,c.parent_id AS parentId,c.content,
+           c.like_count AS likeCount,c.floor,c.created_at AS createdAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM comments c JOIN users u ON c.user_id=u.id
+    WHERE c.topic_id=#{topicId}
+    ORDER BY c.created_at DESC
+  </select>
+    <!-- 按点赞数降序 -->
+  <select id="listByTopicOrderByLikes" resultType="com.bgm.domain.Comment">
+    SELECT c.id,c.topic_id AS topicId,c.user_id AS userId,c.parent_id AS parentId,c.content,
+           c.like_count AS likeCount,c.floor,c.created_at AS createdAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM comments c JOIN users u ON c.user_id=u.id
+    WHERE c.topic_id=#{topicId}
+    ORDER BY c.like_count DESC, c.created_at DESC
+  </select>
+    <!-- 增加评论点赞数 -->
+  <update id="incLike">UPDATE comments SET like_count=like_count+1 WHERE id=#{id}</update>
+    <!-- 减少评论点赞数 -->
+  <update id="decLike">UPDATE comments SET like_count=like_count-1 WHERE id=#{id} AND like_count>0</update>
+    <!-- 查询话题的最大楼层数 -->
+  <select id="maxFloor" resultType="java.lang.Integer">SELECT COALESCE(MAX(floor),0) FROM comments WHERE topic_id=#{topicId}</select>
+</mapper>

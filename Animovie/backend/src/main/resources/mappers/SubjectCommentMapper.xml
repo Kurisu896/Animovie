@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.SubjectCommentMapper">
+  <select id="listBySubjectOrderByCreatedDesc" resultType="com.bgm.domain.SubjectComment">
+    SELECT sc.id,sc.subject_id AS subjectId,sc.user_id AS userId,sc.content,
+           sc.like_count AS likeCount,sc.created_at AS createdAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM subject_comments sc JOIN users u ON sc.user_id=u.id
+    WHERE sc.subject_id=#{subjectId}
+    ORDER BY sc.created_at DESC
+  </select>
+
+  <select id="listBySubjectOrderByLikes" resultType="com.bgm.domain.SubjectComment">
+    SELECT sc.id,sc.subject_id AS subjectId,sc.user_id AS userId,sc.content,
+           sc.like_count AS likeCount,sc.created_at AS createdAt,
+           u.username AS username,u.nickname AS nickname,u.avatar_path AS avatarPath,u.signature AS signature
+    FROM subject_comments sc JOIN users u ON sc.user_id=u.id
+    WHERE sc.subject_id=#{subjectId}
+    ORDER BY sc.like_count DESC, sc.created_at DESC
+  </select>
+
+  <delete id="deleteByIdAndUser">DELETE FROM subject_comments WHERE id=#{id} AND user_id=#{userId}</delete>
+  <update id="incLike">UPDATE subject_comments SET like_count=like_count+1 WHERE id=#{id}</update>
+  <update id="decLike">UPDATE subject_comments SET like_count=like_count-1 WHERE id=#{id} AND like_count>0</update>
+</mapper>

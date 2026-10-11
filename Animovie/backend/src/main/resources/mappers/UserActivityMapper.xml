@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bgm.mapper.UserActivityMapper">
+  <!-- 根据用户ID查询用户动态 -->
+  <select id="listByUser" resultType="com.bgm.domain.UserActivity">
+    SELECT id,user_id AS userId,subject_id AS subjectId,type,detail,created_at AS createdAt
+    FROM user_activity WHERE user_id=#{userId}
+    ORDER BY created_at DESC
+  </select>
+  <!-- 查询全站动态 -->
+  <select id="listAll" resultType="com.bgm.domain.UserActivity">
+    SELECT id,user_id AS userId,subject_id AS subjectId,type,detail,created_at AS createdAt
+    FROM user_activity
+    ORDER BY created_at DESC
+  </select>
+  <delete id="deleteByIdAndUser">DELETE FROM user_activity WHERE id=#{id} AND user_id=#{userId}</delete>
+</mapper>

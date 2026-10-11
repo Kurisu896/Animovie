@@ -2,7 +2,7 @@
 
 AniMovie 是一个面向动漫、影视作品爱好者的追踪与交流社区平台。本项目为基于 Spring Boot 的毕业设计，实现了作品浏览、追番/观影进度管理、评分与短评、专题讨论、动态时间线、榜单搜索、个人主页及 AI 助手等功能。
 
-有想要论文的点个star<img width="48" height="48" alt="0094BF1A" src="https://github.com/user-attachments/assets/ed37a3a2-fbe2-4679-a2fe-ac05ee665bee" />谢谢喵
+有想要论文的点个<img width="48" height="48" alt="0094BF1A" src="https://github.com/user-attachments/assets/ed37a3a2-fbe2-4679-a2fe-ac05ee665bee" />谢谢喵
 
 
 ## 技术栈

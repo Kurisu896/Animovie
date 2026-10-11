@@ -19,9 +19,6 @@ application-local.properties
 application-local.yml
 application-local.yaml
 
-# User uploads
-**/uploads/
-
 # OS files
 .DS_Store
 Thumbs.db
